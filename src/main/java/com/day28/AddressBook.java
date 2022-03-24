@@ -1,7 +1,8 @@
 package com.day28;
 
 /**
- * UC1:- Ability to Read/Write the Address Book with Persons Contact as CSV File
+ * UC14:- Ability to Read/Write the Address Book with Persons Contact as CSV File
+        - Use OpenCSV Library
  */
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -18,21 +19,39 @@ public class AddressBook {
 	 */
 	static String name;
 	static boolean is_Running = false;
+	
+	/**
+	 * Java HashMap which allows us to store key and value pair, where keys should
+	 * be unique. If we try to insert the duplicate key, it will replace the element
+	 * of the corresponding key here key will be String Type and values from the
+	 * contactInfo
+	 */
 	public HashMap<String, ContactInfo> addressBook = new HashMap<>();
+	
+	/**
+	 * creating ArrayList of ContactInfo to store all the contact details
+	 */
 	public ArrayList<ContactInfo> listOfContacts = new ArrayList<>();
 
 	/**
-	 * main method created for the manipulation of CSV File
+	 * Main method for manipulation AddressBook using csv and json library here it
+	 * throws IOException, CsvValidation Exception and ParseException
 	 * 
-	 * @param args
-	 * @throws IOException
-	 * @throws CsvValidationException
+	 * @param args - Default Java param (Not used)
 	 */
 	public static void main(String[] args) throws IOException, CsvValidationException {
+		
+		/**
+		 * creating HashMap for multipleAddressBook
+		 */
 		HashMap<String, AddressBook> multiAddressBook = new HashMap<>();
 		System.out.println("Welcome to the ADDRESS BOOK");
 		AddressBook obj = new AddressBook();
 
+		/**
+		 * creating instance for the addressBook class for the csv file, json file and
+		 * text file
+		 */
 		AddressBook addressBookObj1 = new AddressBook();
 		AddressBook addressBookObj2 = new AddressBook();
 		AddressBook addressBookObj3 = new AddressBook();
@@ -45,8 +64,20 @@ public class AddressBook {
 
 	}
 
+	/**
+	 * create method createContact using the HashMap it will search the particular
+	 * values from the contact if it will not found then throws exception
+	 * @param multiAddressBook
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	public void createContact(HashMap<String, AddressBook> multiAddressBook) throws IOException {
 
+		/**
+		 * Java BufferedWriter class is used to provide buffering for Writer instances. 
+		 * It makes the performance fast. It inherits Writer class. The buffering characters are used 
+		 * for providing the efficient writing of single arrays, characters, and strings.
+		 */
 		BufferedWriter bw1 = new BufferedWriter(
 				new FileWriter("C:\Users\user\Desktop\CSV\AddressBook11.txt"));
 		BufferedWriter bw2 = new BufferedWriter(
@@ -54,6 +85,10 @@ public class AddressBook {
 		BufferedWriter bw3 = new BufferedWriter(
 				new FileWriter("\"C:\\Users\\user\\Desktop\\CSV\\AddressBook33.txt\""));
 
+		/**
+		  * create instance of CSVWriter class taking filewriter object as parameter 
+		  * in parameter passing the csv path
+		  */
 		CSVWriter csv1 = new CSVWriter(
 				new FileWriter("C:\Users\user\Desktop\CSV\AddressBook1.csv"));
 		CSVWriter csv2 = new CSVWriter(
@@ -61,6 +96,9 @@ public class AddressBook {
 		CSVWriter csv3 = new CSVWriter(
 				new FileWriter("C:\Users\user\Desktop\CSV\AddressBook3.csv"));
 
+		/**
+		 * create String of array of type header contains the contact details 
+		 */
 		String[] header = { "FirstName", "LastName", "Address", "City", "State", "Zipcode", "PhoneNo", "Email" };
 		csv1.writeNext(header);
 		csv2.writeNext(header);
@@ -105,6 +143,10 @@ public class AddressBook {
 					multiAddressBook.get(key).addressBook.get(name).displayContactInfo();
 					String outputData = multiAddressBook.get(key).addressBook.get(name).showContact();
 					String csvOutputString = multiAddressBook.get(key).addressBook.get(name).showContactCSV();
+					
+					/**
+					 * CSV Data can be splitted into a comma separated values 
+					 */
 					String[] csvData = csvOutputString.split(",");
 					switch (option) {
 					case 1 -> {
