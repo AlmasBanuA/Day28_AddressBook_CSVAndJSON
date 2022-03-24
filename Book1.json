@@ -1,0 +1,20 @@
+{
+   "Almas": {
+      "LastName": "Advani",
+      "Address": "Gandhinagar",
+      "City": "Harihar",
+      "State": "Karnataka",
+      "ZipCode": 577601,
+      "PhoneNo": 9606781947,
+      "Email": "almas@gmail.com"
+   },
+   "Ayat": {
+      "LastName": "Arif",
+      "Address": "VasantNagar",
+      "City": "Goa",
+      "State": "Goa",
+      "ZipCode": 787878,
+      "PhoneNo": 9877878798,
+      "Email": "ayat@gmail.com"
+   }
+}
