@@ -22,9 +22,6 @@ package com.day28;
  * UC8:- Ability to search Person in a City or State across the multiple AddressBook
  * 
  * UC9:- Ability to view Persons by City or State 
- * 
- * UC10:- Ability to get number of contact persons i.e. count by City or State
-		- Search Result will show count by city and by state by using java streams
  * @author user -Almas
  *
  */
@@ -162,22 +159,6 @@ public class AddressBook {
 	}
 
 	/**
-	 * Declaring The Count Contacts Method By City Name Using Java Streams To Count
-	 * The Contacts By using City Name
-	 * 
-	 * @param cityName -passing the city name to count the contacts method
-	 */
-	public void countContactsByUsingCity(String cityName) {
-		long count = 0;
-		long count1 = contactDetailsList.stream().filter(g -> g.getCity().equalsIgnoreCase(cityName)).count();
-		for (ContactDetails contact : contactDetailsList) {
-			count1 = count1 + count;
-		}
-		System.out.println("Contact List :" + count1);
-
-	}
-
-	/**
 	 * Declaring The Edit Contact Method To Edit The Details Of Contact Edit By
 	 * Using FirstName If First Name Is Match The Contact Will Edit
 	 */
@@ -277,8 +258,8 @@ public class AddressBook {
 	}
 
 	/**
-	 * create method viewByOptions() is used to view the options by searching the
-	 * person using option like name, city, state and from previous menu
+	 * create method searchByOptions() by searching the person using option like
+	 * name, city, state and from previous menu
 	 */
 	public void viewByOptions() {
 		Scanner scanner = new Scanner(System.in);
