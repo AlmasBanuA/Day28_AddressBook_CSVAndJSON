@@ -1,515 +1,357 @@
 package com.day28;
 
 /**
- * UC14:- Ability to Read/Write the Address Book with Persons Contact as CSV File
-        - Use OpenCSV Library
-        
- * UC15:- Ability to Read or Write the Address Book with Persons Contact as JSON File
-        - Use GSON Library
+ * UC1:- Ability to create a Contacts in Address Book with first and last names,
+ * address, city, state, zip, phone number and email...
+ * 
+ * UC2:- Ability to add a new Contact to Address Book
+ * 
+ * UC3:- Ability to edit existing contact person using their name
+ * 
+ * UC4:- Ability to delete a person using person's name
+ * 
+ * UC5:- Ability to add multiple person to Address Book
+ * 
+ * UC6:- Refactor to add multiple Address Book to the System. 
+ * Each Address Book has a unique Name - Use Console to add new Address Book 
+ * - Maintain Dictionary of Address Book Name
+ * 
+ * UC7:- Ability to ensure there is no Duplicate Entry of the same Person in a particular
+ * Address Book
+ * 
+ * UC8:- Ability to search Person in a City or State across the multiple AddressBook
+ * 
+ * UC9:- Ability to view Persons by City or State 
+ * 
+ * UC10:- Ability to get number of contact persons i.e. count by City or State
+		- Search Result will show count by city and by state by using java streams
+		
+ * UC11:- Ability to sort the entries in the address book alphabetically by Person’s name
+ * 
+ * UC12:- Ability to sort the entries in the address book by City, State, or Zip
+ * 
+ * UC13:- Ability to Read or Write the Address Book with Persons Contact into a File using File IO
+ * 
+ * @author user -Almas
+ *
  */
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvValidationException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.day28.ContactDetails;
 
 public class AddressBook {
 
 	/**
-	 * declaring variables
+	 * creating person object of contactDetails class
 	 */
-	static String name;
-	static boolean is_Running = false;
+	ContactDetails person = new ContactDetails();
 
 	/**
-	 * Java HashMap which allows us to store key and value pair, where keys should
-	 * be unique. If we try to insert the duplicate key, it will replace the element
-	 * of the corresponding key here key will be String Type and values from the
-	 * contactInfo
+	 * Creating a List of ContactDetails using ArrayList
 	 */
-	public HashMap<String, ContactInfo> addressBook = new HashMap<>();
+	List<ContactDetails> contactDetailsList = new ArrayList<>();
 
 	/**
-	 * creating ArrayList of ContactInfo to store all the contact details
+	 * Declaring The Add Contact Method And Entering The Contact Details By Using
+	 * Scanner Class And Printing The Contact Details Of Person
 	 */
-	public ArrayList<ContactInfo> listOfContacts = new ArrayList<>();
-
-	/**
-	 * Main method for manipulation AddressBook using csv and json library here it
-	 * throws IOException, CsvValidation Exception and ParseException
-	 * 
-	 * @param args - Default Java param (Not used)
-	 */
-	public static void main(String[] args) throws IOException, CsvValidationException, ParseException {
-
-		/**
-		 * creating HashMap for multipleAddressBook
-		 */
-		HashMap<String, AddressBook> multiAddressBook = new HashMap<>();
-		System.out.println("Welcome to the ADDRESS BOOK");
-		AddressBook obj = new AddressBook();
-
-		/**
-		 * creating instance for the addressBook class for the csv file, json file and
-		 * text file
-		 */
-		AddressBook addressBookObj1 = new AddressBook();
-		AddressBook addressBookObj2 = new AddressBook();
-		AddressBook addressBookObj3 = new AddressBook();
-		multiAddressBook.put("AB1", addressBookObj1);
-		multiAddressBook.put("AB2", addressBookObj2);
-		multiAddressBook.put("AB3", addressBookObj3);
-
-		obj.createContact(multiAddressBook);
-		/**
-		 * read simple text file
-		 */
-		obj.readFromFile();
-		/**
-		 * read CSV file
-		 */
-		obj.readFromCSVFile();
-		/**
-		 * read JSON file
-		 */
-		obj.readJSONFile();
-	}
-
-	/**
-	 * create method createContact using the HashMap it will search the particular
-	 * values from the contact if it will not found then throws exception
-	 * @param multiAddressBook
-	 * @throws IOException
-	 * @throws ParseException
-	 */
-	public void createContact(HashMap<String, AddressBook> multiAddressBook) throws IOException, ParseException {
-
-		/**
-		 * Java BufferedWriter class is used to provide buffering for Writer instances. 
-		 * It makes the performance fast. It inherits Writer class. The buffering characters are used 
-		 * for providing the efficient writing of single arrays, characters, and strings.
-		 */
-		BufferedWriter bw1 = new BufferedWriter(
-				new FileWriter("C:\\Users\user\\Desktop\\CSV\'Book1.txt\\"));
-		BufferedWriter bw2 = new BufferedWriter(
-				new FileWriter("C:\Users\user\Desktop\CSV\Book2.txt"));
-		BufferedWriter bw3 = new BufferedWriter(
-				new FileWriter("C:\Users\user\Desktop\CSV\Book3.txt"));
-
-		 /**
-		  * create instance of CSVWriter class taking filewriter object as parameter 
-		  * in parameter passing the csv path
-		  */
-		CSVWriter csv1 = new CSVWriter(
-				new FileWriter("C:\Users\user\Desktop\CSV\Book1.csv"));
-		CSVWriter csv2 = new CSVWriter(
-				new FileWriter("C:\Users\user\Desktop\CSV\Book2.csv"));
-		CSVWriter csv3 = new CSVWriter(
-				new FileWriter("C:\Users\user\Desktop\CSV\Book3.csv"));
-
-		/**
-		 * create String of array of type header contains the contact details 
-		 */
-		String[] header = { "FirstName", "LastName", "Address", "City", "State", "Zipcode", "PhoneNo", "Email" };
-		csv1.writeNext(header);
-		csv2.writeNext(header);
-		csv3.writeNext(header);
-
-		Gson gson = new Gson();
-
-		FileWriter jsonFW1 = new FileWriter("C:\Users\user\Desktop\CSV\Book1.json");
-		FileWriter jsonFW2 = new FileWriter("C:\Users\user\Desktop\CSV\Book2.json");
-		FileWriter jsonFW3 = new FileWriter("C:\Users\user\Desktop\CSV\Book3.json");
-
-		JSONArray outerObj1 = new JSONArray();
-		JSONArray outerObj2 = new JSONArray();
-		JSONArray outerObj3 = new JSONArray();
-
-		JSONObject jsonObject = new JSONObject();
-
-		while (!is_Running) {
-			Scanner scanner = new Scanner(System.in);
-			System.out.println("Enter 1 ,2 ,3 for diff addressBook and 4 to exit");
-			int option = scanner.nextInt();
-			String key = switch (option) {
-			case 1 -> "AB1";
-			case 2 -> "AB2";
-			case 3 -> "AB3";
-			default -> null;
-			};
-			if (option == 4)
-				break;
-			System.out.println("""
-					 Enter:
-					1.Create a new contact
-					2.Exit
-					3.Edit existing contact
-					4.Delete an existing contact
-					5.SearchContactBasedOnCity
-					6.SortContactsByPersonName
-					7.SortContactsByCity
-					8.SortContactsByState
-					9.SortContactsByZip""");
-			int choice = scanner.nextInt();
-			if (choice == 1) {
-				ContactInfo contact = new ContactInfo();
-				contact.setContactInfo();
-				name = contact.firstName.toUpperCase(Locale.ROOT) + " " + contact.lastName.toUpperCase(Locale.ROOT);
-				
-				/**
-				 *  Java Streams is used to check any Duplicate entries
-				 */
-				if (multiAddressBook.get(key).addressBook.keySet().stream().noneMatch(k -> k.equals(name))) { 
-					
-					multiAddressBook.get(key).addressBook.put(name, contact);
-					multiAddressBook.get(key).listOfContacts.add(contact); 
-					/**
-					 *  contact already exist in the addressBook
-					 */
-					multiAddressBook.get(key).addressBook.get(name).displayContactInfo();
-					String outputData = multiAddressBook.get(key).addressBook.get(name).showContact();
-					String csvOutputString = multiAddressBook.get(key).addressBook.get(name).showContactCSV();
-					
-					/**
-					 * CSV Data can be splitted into a comma separated values 
-					 */
-					String[] csvData = csvOutputString.split(",");
-					String json = gson.toJson(contact);
-					JSONParser parser = new JSONParser();
-					JSONObject strToJsonObj = (JSONObject) parser.parse(json);
-
-					switch (option) {
-					case 1 -> {
-						bw1.write(outputData);
-						csv1.writeNext(csvData);
-						outerObj1.add(strToJsonObj);
-					}
-					case 2 -> {
-						bw2.write(outputData);
-						csv2.writeNext(csvData);
-						outerObj2.add(strToJsonObj);
-					}
-					case 3 -> {
-						bw3.write(outputData);
-						csv3.writeNext(csvData);
-						outerObj3.add(strToJsonObj);
-					}
-					}
-
-				} else
-					System.out.println("Contact already exist duplicate not allowed");
-			} else if (choice == 2) {
-				is_Running = true;
-			} else if (choice == 3) {
-				multiAddressBook.get(key).editContact();
-			} else if (choice == 4) {
-				multiAddressBook.get(key).deleteContact();
-			} else if (choice == 5) {
-				searchContactBasedOnCity(multiAddressBook);
-			} else if (choice == 6) {
-				sortContactsByPersonName(multiAddressBook);
-			} else if (choice == 7) {
-				sortContactsByCity(multiAddressBook);
-			} else if (choice == 8) {
-				sortContactsByState(multiAddressBook);
-			} else if (choice == 9) {
-				sortContactsByZip(multiAddressBook);
-			}
-		}
-
-		jsonFW1.write(outerObj1.toString());
-		jsonFW2.write(outerObj2.toString());
-		jsonFW3.write(outerObj3.toString());
-
-		bw1.close();
-		bw2.close();
-		bw3.close();
-
-		csv1.close();
-		csv2.close();
-		csv3.close();
-
-		jsonFW1.close();
-		jsonFW2.close();
-		jsonFW3.close();
-	}
-
-	/**
-	 * Method for reading JSON File
-	 * 
-	 * @throws IOException
-	 * @throws ParseException
-	 */
-	public void readJSONFile() throws IOException, ParseException {
-		System.out.println("--------------------------------------------------------------\n Read from JSON File: ");
-		JSONParser parser = new JSONParser();
-		JSONArray jsonArray1 = (JSONArray) parser
-				.parse(new FileReader("C:\Users\user\Desktop\CSV\Book1.json"));
-		System.out.println(jsonArray1.toJSONString());
-
-		JSONArray jsonArray2 = (JSONArray) parser
-				.parse(new FileReader("C:\Users\user\Desktop\CSV\Book2.json"));
-		System.out.println(jsonArray2.toJSONString());
-
-		JSONArray jsonArray3 = (JSONArray) parser
-				.parse(new FileReader("C:\Users\user\Desktop\CSV\Book3.json"));
-		System.out.println(jsonArray3.toJSONString());
-	}
-
-	/**
-	 * Method for reading data from csv file
-	 *
-	 * @throws IOException
-	 * @throws CsvValidationException
-	 */
-	public void readFromCSVFile() throws IOException, CsvValidationException {
-		System.out
-				.println("--------------------------------------------------------------\nReading from CSV files:  \n");
-		String[] contactInfo;
-		CSVReader csvR1 = new CSVReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book1.csv"));
-		while ((contactInfo = csvR1.readNext()) != null) {
-			for (String cell : contactInfo) {
-				System.out.print(cell + "\t");
-			}
-			System.out.println();
-		}
-		System.out.println("\n");
-		CSVReader csvR2 = new CSVReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book2.csv"));
-		while ((contactInfo = csvR2.readNext()) != null) {
-			for (String cell : contactInfo) {
-				System.out.print(cell + "\t");
-			}
-			System.out.println();
-		}
-		System.out.println("\n");
-		CSVReader csvR3 = new CSVReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book3.csv"));
-		while ((contactInfo = csvR3.readNext()) != null) {
-			for (String cell : contactInfo) {
-				System.out.print(cell + "\t");
-			}
-			System.out.println();
-		}
-	}
-
-	/**
-	 * Method for reading contacts stored in addressBook .txt File
-	 *
-	 * @throws IOException
-	 */
-	public void readFromFile() throws IOException {
-		String contact;
-		System.out.println(
-				"--------------------------------------------------------------\nReading from File IO method: \n");
-		System.out.println("List of Contacts in AddressBook 1 : ");
-		System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
-		BufferedReader br1 = new BufferedReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book1.txt"));
-		while ((contact = br1.readLine()) != null) {
-			System.out.println(contact);
-		}
-		System.out.println("\nList of Contacts in AddressBook 2 : ");
-		System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
-		BufferedReader br2 = new BufferedReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book2.txt"));
-		while ((contact = br2.readLine()) != null) {
-			System.out.println(contact);
-		}
-		System.out.println("\nList of Contacts in AddressBook 3 : ");
-		System.out.println("firstName, lastName, address, city, state, zipcode, phoneNo, email");
-		BufferedReader br3 = new BufferedReader(
-				new FileReader("C:\Users\user\Desktop\CSV\Book3.txt"));
-		while ((contact = br3.readLine()) != null) {
-			System.out.println(contact);
-		}
-	}
-
-	/**
-	 * Method to delete an existing contact
-	 */
-	public void deleteContact() {
+	public void addContact() {
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("Enter the first and last name of the contact you want to delete from AddressBook: ");
-		String name = scanner.nextLine().toUpperCase(Locale.ROOT);
-		if (addressBook.containsKey(name)) {
-			addressBook.remove(name);
-			System.out.println("Contact removed");
-		} else
-			System.out.println("Contact not found");
+		System.out.println("Enter the number of contacts you want to enter");
+		int number = scanner.nextInt();
+
+		/**
+		 * for loop will use if we enter the number of contacts that number of times the
+		 * for loop will execute
+		 */
+		for (int i = 0; i < number; i++) {
+
+			/**
+			 * checking the duplicate contacts of person by contact first name because there
+			 * is no Duplicate Entry of the same Person in a particular Address Book
+			 */
+			System.out.println("Enter the first name of person");
+			String fName = scanner.next();
+
+			/**
+			 * if else condition is used to check the same person is exist or not
+			 */
+			if (fName.equals(person.getFirstName())) {
+				System.out.println("The entered person is already exist. Enter new name");
+			} else {
+				System.out.println("Enter the contact details of person ");
+
+				/**
+				 * calling method wrireContact() to enter all the contact details
+				 */
+				writeContact();
+				System.out.println("contact added Successfully");
+			}
+		}
 	}
 
 	/**
-	 * Method to edit an existing contact
+	 * created method writeContact() to create a new contacts to the AddressBook
+	 */
+	public void writeContact() {
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Enter First Name : ");
+		String firstName = scanner.next();
+		System.out.println("Enter Last Name : ");
+		String lastName = scanner.next();
+		System.out.println("Enter Address : ");
+		String address = scanner.next();
+		System.out.println("Enter City : ");
+		String city = scanner.next();
+		System.out.println("Enter State : ");
+		String state = scanner.next();
+		System.out.println("Enter ZipCode : ");
+		int zipCode = scanner.nextInt();
+		System.out.println("Enter Mobile Number : ");
+		long mobileNumber = scanner.nextLong();
+		System.out.println("Enter EmailId : ");
+		String emailId = scanner.next();
+
+		/**
+		 * storing or adding all the contactDetails to the person
+		 */
+		person = new ContactDetails(firstName, lastName, address, city, state, zipCode, mobileNumber, emailId);
+		contactDetailsList.add(person);
+	}
+
+	/**
+	 * create method searchByName that is Ability to search Person across the
+	 * multiple AddressBook by name
+	 * 
+	 * @param name -passing name
+	 */
+	public void searchByName(String name) {
+
+		/**
+		 * creating Stream from list of contactDetails. Filter operation produces a new
+		 * stream that contains elements of the original stream that pass a given
+		 * test(specified by a Predicate). filter(),is a Intermediate operations return
+		 * a new stream on which further processing can be done. here filter is used to
+		 * search particular name of a person and the filtered stream is creates a list
+		 * and will collect in a contactDetails using collector
+		 */
+		List<ContactDetails> collect = contactDetailsList.stream().filter(p -> p.getFirstName().equalsIgnoreCase(name))
+				.collect(Collectors.toList());
+		for (ContactDetails contact : collect) {
+			System.out.println("Search result: " + contact);
+		}
+	}
+
+	/**
+	 * create method searchByCity that is Ability to search Person across the
+	 * multiple AddressBook by City
+	 * 
+	 * @param name -passing City name
+	 */
+	public void searchByCity(String city) {
+		List<ContactDetails> collect = contactDetailsList.stream().filter(p -> p.getCity().equalsIgnoreCase(city))
+				.collect(Collectors.toList());
+
+		/**
+		 * ForEach() method is used and it is a Terminal operations mark the stream as
+		 * consumed, after which point it can no longer be used further.
+		 */
+		for (ContactDetails contact : collect) {
+			System.out.println("Search result: " + contact);
+		}
+	}
+
+	/**
+	 * create method searchByState that is Ability to search Person across the
+	 * multiple AddressBook by State
+	 * 
+	 * @param name -passing State name
+	 */
+	public void searchByState(String state) {
+		List<ContactDetails> collect = contactDetailsList.stream().filter(p -> p.getCity().equalsIgnoreCase(state))
+				.collect(Collectors.toList());
+		for (ContactDetails contact : collect) {
+			System.out.println("Search result: " + contact);
+		}
+	}
+
+	/**
+	 * Declaring The Count Contacts Method By City Name Using Java Streams To Count
+	 * The Contacts By using City Name
+	 * 
+	 * @param cityName -passing the city name to count the contacts method
+	 */
+	public void countContactsByUsingCity(String cityName) {
+		long count = 0;
+		long count1 = contactDetailsList.stream().filter(g -> g.getCity().equalsIgnoreCase(cityName)).count();
+		for (ContactDetails contact : contactDetailsList) {
+			count1 = count1 + count;
+		}
+		System.out.println("Contact List :" + count1);
+
+	}
+
+	/**
+	 * Declaring Sort Method Sorting The Details Of Contact By Using Names Using
+	 * Stream method
+	 */
+	public void sortByName() {
+		List<ContactDetails> list = contactDetailsList.stream().collect(Collectors.toList());
+		list.stream().sorted((g1, g2) -> ((String) g1.getFirstName()).compareTo(g2.getFirstName()))
+				.forEach(contact -> System.out.println(contact.getFirstName() + " " + contact.getLastName()));
+	}
+
+	/**
+	 * Declaring Sort Method Sorting The Details Of Contact By City
+	 */
+	public void sortByCity() {
+		List<ContactDetails> list = contactDetailsList.stream().collect(Collectors.toList());
+		list.stream().sorted((g1, g2) -> ((String) g1.getCity()).compareTo(g2.getCity()))
+				.forEach(contact -> System.out.println(contact.getFirstName() + " " + contact.getLastName()));
+	}
+
+	/**
+	 * Declaring The Edit Contact Method To Edit The Details Of Contact Edit By
+	 * Using FirstName If First Name Is Match The Contact Will Edit
 	 */
 	public void editContact() {
-		Scanner sc = new Scanner(System.in);
-		System.out.print("Enter your first name and Last name  : ");
-		String name = sc.nextLine().toUpperCase(Locale.ROOT);
-		if (addressBook.containsKey(name)) {
-			System.out.println(
-					"Enter the number you want to edit\n1.Address\n2.City\n3.State\n4.Zipcode\n5.Phone Number\n6.Email");
-			int number = sc.nextInt();
-			sc.nextLine();
-			switch (number) {
-			case 1 -> {
-				System.out.println("Enter new Address");
-				addressBook.get(name).setAddress(sc.nextLine());
-			}
-			case 2 -> {
-				System.out.println("Enter new City");
-				addressBook.get(name).setCity(sc.nextLine());
-			}
-			case 3 -> {
-				System.out.println("Enter new State");
-				addressBook.get(name).setState(sc.nextLine());
-			}
-			case 4 -> {
-				System.out.println("Enter new ZipCode");
-				addressBook.get(name).setZipcode(sc.nextLine());
-			}
-			case 5 -> {
-				System.out.println("Enter new Phone number");
-				addressBook.get(name).setPhoneNo(sc.nextLine());
-			}
-			case 6 -> {
-				System.out.println("Enter new Email");
-				addressBook.get(name).setEmail(sc.nextLine());
-			}
-			default -> System.out.println("Please input a valid number (1-6)");
-			}
-			addressBook.get(name).displayContactInfo();
-		} else
-			System.out.println("Contact not found");
-	}
-
-	/**
-	 * Method for searching contacts based on city using HashMap
-	 */
-	public void searchContactBasedOnCity(HashMap<String, AddressBook> multiAddressBook) {
-
-		HashMap<String, String> personCityDictionary = new HashMap<>();
+		System.out.println("Enter firstname of contact you want edit");
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("Enter the city to search the contacts based on city");
-		String searchCity = scanner.nextLine();
-		int counter = 0;
-
-		for (Map.Entry<String, AddressBook> addressBookEntry : multiAddressBook.entrySet()) {
-			addressBookEntry.getKey();
-			AddressBook currentAddressBook = addressBookEntry.getValue();
-			for (ContactInfo item : currentAddressBook.listOfContacts) {
-				System.out.println("Contact details: ");
-				System.out.println(item.showContact());
-			}
-
-		}
-
-		for (Map.Entry<String, AddressBook> addressBookEntry : multiAddressBook.entrySet()) {
-			System.out.println(addressBookEntry.getKey());
-			for (Map.Entry<String, ContactInfo> contactEntry : addressBookEntry.getValue().addressBook.entrySet()) {
-				String result = addressBookEntry.getValue().addressBook.get(contactEntry.getKey()).showContact();
-				System.out.println(contactEntry.getKey());
-				if (result.contains(searchCity)) {
-					personCityDictionary.put(contactEntry.getKey(), searchCity);
-					counter++;
+		String editName = scanner.next();
+		for (int i = 0; i < contactDetailsList.size(); i++) {
+			String name = contactDetailsList.get(i).getFirstName();
+			if (name.equalsIgnoreCase(editName)) {
+				System.out.println("Enter name is exit. you can edit the details");
+				while (true) {
+					System.out.println(
+							"Enter\n 1. To edit all details\n 2. To edit certain detail\n 3. for previous menu");
+					int choose = scanner.nextInt();
+					switch (choose) {
+					case 1:
+						contactDetailsList.remove(i);
+						writeContact();
+						break;
+					case 2:
+						while (true) {
+							System.out.println(
+									"Enter\n 1. for First Name\n 2. for Last Name\n 3. for City\n 4. for State\n"
+											+ " 5. for Zip Code\n 6. for Phone\n 7. forEmail\n 8. for previous menu");
+							int option = scanner.nextInt();
+							switch (option) {
+							case 1:
+								System.out.println("Enter new First Name");
+								String newFirstName = scanner.next();
+								contactDetailsList.get(i).setFirstName(newFirstName);
+								break;
+							case 2:
+								System.out.println("Enter new Last Name");
+								String newLastName = scanner.next();
+								contactDetailsList.get(i).setLastName(newLastName);
+								break;
+							case 3:
+								System.out.println("Enter new City");
+								String newCity = scanner.next();
+								contactDetailsList.get(i).setCity(newCity);
+								break;
+							case 4:
+								System.out.println("Enter new State");
+								String newState = scanner.next();
+								contactDetailsList.get(i).setState(newState);
+								break;
+							case 5:
+								System.out.println("Enter new ZipCode");
+								int newZip = scanner.nextInt();
+								contactDetailsList.get(i).setZipCode(newZip);
+								break;
+							case 6:
+								System.out.println("Enter new Phone Number");
+								int newPNumber = scanner.nextInt();
+								contactDetailsList.get(i).setMobileNumber(newPNumber);
+								break;
+							case 7:
+								System.out.println("Enter new Email");
+								String newEmail = scanner.next();
+								contactDetailsList.get(i).setEmailId(newEmail);
+								break;
+							case 8:
+								return;
+							default:
+								System.out.println("Entered choice is incorrect!.. please enter correct choice");
+							}
+						}
+					case 3:
+						return;
+					default:
+						System.out.println("Entered choice is incorrect!.. please enter correct choice");
+					}
 				}
+			} else {
+				System.out.println("enter name not exist");
 			}
-		}
-		for (Map.Entry<String, String> pEntry : personCityDictionary.entrySet()) {
-			System.out.println("Key= " + pEntry.getKey() + ", Value= " + pEntry.getValue());
-		}
-		System.out.println("No of contacts from the searched city were: " + counter);
-	}
-
-	/**
-	 * Method for sorting contacts based on Person Name
-	 *
-	 * @param multiAddressBook HashMap containing all addressBooks is passed as
-	 *                         parameter
-	 */
-	public void sortContactsByPersonName(HashMap<String, AddressBook> multiAddressBook) {
-
-		for (Map.Entry<String, AddressBook> addressBookMapEntry : multiAddressBook.entrySet()) {
-			List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream()
-					.sorted(Comparator.comparing(contactInfo -> contactInfo.firstName + contactInfo.lastName))
-					.collect(Collectors.toList());
-			System.out.println("Sorted Contacts By name : ");
-			for (ContactInfo currentContact : sortedContacts) {
-				System.out.println(currentContact.getFirstName() + " " + currentContact.getLastName());
-			}
-			System.out.println("\n");
 		}
 	}
 
 	/**
-	 * Method for sorting contacts based on City
-	 *
-	 * @param multiAddressBook HashMap containing all addressBooks is passed as a
-	 *                         parameter
+	 * Declaring Delete Contact Method To delete The Details Of Contact Delete By
+	 * Using FirstName If First Name Is Match Then Contact Will Delete
 	 */
-	public void sortContactsByCity(HashMap<String, AddressBook> multiAddressBook) {
-
-		for (Map.Entry<String, AddressBook> addressBookMapEntry : multiAddressBook.entrySet()) {
-			List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream()
-					.sorted(Comparator.comparing(contactInfo -> contactInfo.city)).collect(Collectors.toList());
-			System.out.println("Sorted Contacts By City : ");
-			for (ContactInfo currentContact : sortedContacts) {
-				System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName()
-						+ " City " + currentContact.getCity());
+	public void deleteContact() {
+		System.out.println("Enter the first name of contact you want to delete");
+		Scanner scanner = new Scanner(System.in);
+		String deleteName = scanner.next();
+		for (int i = 0; i < contactDetailsList.size(); i++) {
+			if (deleteName.equalsIgnoreCase(contactDetailsList.get(i).getFirstName())) {
+				contactDetailsList.remove(i);
+				System.out.println("contact delete successfully");
+			} else {
+				System.out.println("enter name dose not exit");
 			}
-			System.out.println("\n");
-
 		}
 	}
 
 	/**
-	 * Method for sorting contacts based on State
-	 *
-	 * @param multiAddressBook HashMap containing all addressBooks is passed as a
-	 *                         parameter
+	 * create method viewByOptions() is used to view the options by searching the
+	 * person using option like name, city, state and from previous menu
 	 */
-	public void sortContactsByState(HashMap<String, AddressBook> multiAddressBook) {
-
-		for (Map.Entry<String, AddressBook> addressBookMapEntry : multiAddressBook.entrySet()) {
-			List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream()
-					.sorted(Comparator.comparing(contactInfo -> contactInfo.state)).collect(Collectors.toList());
-			System.out.println("Sorted Contacts By State : ");
-			for (ContactInfo currentContact : sortedContacts) {
-				System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName()
-						+ " State " + currentContact.getState());
+	public void viewByOptions() {
+		Scanner scanner = new Scanner(System.in);
+		while (true) {
+			System.out.println("Enter\n 1. By name\n 2. By city\n 3. By state\n 4. Count Contacts\n"
+					+ "5. Sort the entries Alphabetically\n 0. for previous menu");
+			int choice = scanner.nextInt();
+			scanner.nextLine();
+			switch (choice) {
+			case 1:
+				System.out.println("Enter name: ");
+				String name = scanner.nextLine();
+				searchByName(name);
+				break;
+			case 2:
+				System.out.println("Enter city: ");
+				String city = scanner.nextLine();
+				searchByCity(city);
+				break;
+			case 3:
+				System.out.println("Enter state: ");
+				String state = scanner.nextLine();
+				searchByState(state);
+				break;
+			case 4:
+				System.out.println("Enter The Name Of City");
+				String cityName = scanner.next();
+				countContactsByUsingCity(cityName);
+			case 5:
+				sortByName();
+				break;
+			case 6:
+				sortByCity();
+			case 0:
+				return;
+			default:
+				System.out.println("Entered choice is incorrect!.. please enter correct choice");
 			}
-			System.out.println("\n");
-
-		}
-	}
-
-	/**
-	 * Method for sorting contacts based on Zipcode
-	 *
-	 * @param multiAddressBook HashMap containing all addressBooks is passed as a
-	 *                         parameter
-	 */
-	public void sortContactsByZip(HashMap<String, AddressBook> multiAddressBook) {
-
-		for (Map.Entry<String, AddressBook> addressBookMapEntry : multiAddressBook.entrySet()) {
-			List<ContactInfo> sortedContacts = addressBookMapEntry.getValue().addressBook.values().stream()
-					.sorted(Comparator.comparing(contactInfo -> contactInfo.zipcode)).collect(Collectors.toList());
-			System.out.println("Sorted Contacts By Zip : ");
-			for (ContactInfo currentContact : sortedContacts) {
-				System.out.println("Name: " + currentContact.getFirstName() + " " + currentContact.getLastName()
-						+ " Zip " + currentContact.getZipcode());
-			}
-			System.out.println("\n");
 		}
 	}
 }
