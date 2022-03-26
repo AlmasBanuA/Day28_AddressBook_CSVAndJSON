@@ -25,8 +25,6 @@ package com.day28;
  * 
  * UC10:- Ability to get number of contact persons i.e. count by City or State
 		- Search Result will show count by city and by state by using java streams
-		
- * UC11:- Ability to sort the entries in the address book alphabetically by Person’s name
  * @author user -Almas
  *
  */
@@ -177,16 +175,6 @@ public class AddressBook {
 		}
 		System.out.println("Contact List :" + count1);
 
-	}
-
-	/**
-	 * Declaring Sort Method Sorting The Details Of Contact By Using Names Using
-	 * Stream method
-	 */
-	public void sortByName() {
-		List<ContactDetails> list = contactDetailsList.stream().collect(Collectors.toList());
-		list.stream().sorted((g1, g2) -> ((String) g1.getFirstName()).compareTo(g2.getFirstName()))
-				.forEach(contact -> System.out.println(contact.getFirstName() + " " + contact.getLastName()));
 	}
 
 	/**
