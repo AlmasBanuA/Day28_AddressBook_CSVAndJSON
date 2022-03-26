@@ -8,7 +8,6 @@ package com.day28;
  * 
  * UC3:- Ability to edit existing contact person using their name
  * 
- * UC4:- Ability to delete a person using person's name
  * @author user -Almas
  *
  */
@@ -54,7 +53,7 @@ public class AddressBook {
 	}
 
 	/**
-	 * created method editContact() to editing the contacts
+	 * created method printContact() to display the data
 	 */
 	public void editContact() {
 		System.out.println("Enter the first name of person to edit Contact : ");
@@ -68,22 +67,9 @@ public class AddressBook {
 	}
 
 	/**
-	 * created method deleteContact() to deleting the contacts
-	 */
-	public void deleteContact() {
-		System.out.println("Enter the First name of Person to Delete Contact : ");
-		String deleteName = scanner.next();
-		if (deleteName.equalsIgnoreCase(person.getFirstName())) {
-			System.out.println("Deleted " + person.getFirstName() + " details");
-			person = null;
-		} else {
-			System.out.println("The Entered First Name is Not Matched");
-			deleteContact();
-		}
-	}
-
-	/**
-	 * created method printContact() to display all the contacts
+	 * Main method for manipulation AddressBookCollection
+	 * 
+	 * @param args - Default Java param (Not used)
 	 */
 	public static void printContact() {
 		for (int i = 0; i < contactDetailsList.size(); i++) {
